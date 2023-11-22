@@ -1,0 +1,25 @@
+#!/usr/bin/bash
+
+#PBS -l nodes=1:ppn=24
+#PBS -l mem=60gb
+#PBS -l walltime=48:00:00
+
+
+# Load TransDecoder
+module load TransDecoder
+
+# Move to transcriptome directory
+cd ${phylodb_extra_transcriptome_dir}
+
+# loop through all fasta files in the current directory
+for fasta_file in  *.fasta.gz; do 
+    # extract the name before the ".fasta.gz" part
+    #name=${fasta_file%.fasta.gz}
+
+     # run TransDecoder on the fasta file, using the extracted name as the prefix for the output files
+     TransDecoder.LongOrfs -t $fasta_file 
+     TransDecoder.Predict -t $fasta_file --single_best_only;
+done
+
+# After the script has been completed, remove the unnecessary output and retain the *.pep files
+# Then, I've modified the headers using the script rename_fasta_headers

@@ -1,0 +1,20 @@
+#!/usr/bin/bash -l
+
+#PBS -l nodes=1:ppn=96
+#PBS -l walltime=72:00:00
+#PBS -l mem=200gb
+
+source ../config.sh
+source activate eggnog
+
+cd ${assembly_prot_dir}
+
+unset OMP_PROC_BIND
+
+emapper.py -m mmseqs --no_annot  --no_file_comments --cpu 0 -i ${assembly_pep} -o SPAdes_eggNOG \
+    --output_dir ${eggnog_out_dir} --data_dir ${eggnog_ref_dir} --override
+
+emapper.py --annotate_hits_table ${eggnog_out_dir}SPAdes_eggNOG.emapper.seed_orthologs \
+     --no_file_comments --data_dir ${eggnog_ref_dir} \
+     -o functional_annotation --cpu 0 --dbmem \
+     --output_dir ${eggnog_out_dir} --override

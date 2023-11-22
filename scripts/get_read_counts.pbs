@@ -1,0 +1,27 @@
+#!/usr/bin/bash -l
+
+#PBS -l nodes=1:ppn=12
+#PBS -l walltime=02:00:00
+#PBS -l mem=8gb
+
+folder_directory=${work_dir}'/data/raw'
+
+cd ${folder_directory}
+
+for file in *.fastq.gz; do
+    echo $file;
+    zcat $file | echo $((`wc -l`/4));
+done > read_count.txt
+
+folder_directory=${work_dir}'/data/scratch/'
+
+cd ${folder_directory}
+
+declare -a Folders=('cleanup' 'rRNA' 'trimmed' 'merged')
+
+for folder in ${Folders[@]}; do
+    for file in $folder/*.fastq.gz; do
+        echo $file;
+        zcat $file | echo $((`wc -l`/4));
+    done > $folder/read_count.txt;
+done

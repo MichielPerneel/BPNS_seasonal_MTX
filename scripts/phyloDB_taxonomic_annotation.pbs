@@ -1,0 +1,64 @@
+#!/usr/bin/bash -l
+
+#PBS -l nodes=1:ppn=30
+#PBS -l walltime=72:00:00
+#PBS -l mem=150gb
+
+source ../config.sh
+
+unset OMP_PROC_BIND
+
+module load MMseqs2
+
+# Turn the PhyloDB sequences into a mmseqs DB
+mmseqs createdb ${phylodb_ref_dir}${phylodb_ref_fasta} ${phylodb_ref_dir}${phylodb_reference}
+
+# Turn the query assembly into a mmseqs DB
+mmseqs createdb ${assembly_prot_dir}${assembly_pep} ${assembly_prot_dir}${assembly_mmseqsDB}
+
+# Query assembly against phylodb_reference
+mmseqs search ${assembly_prot_dir}${assembly_mmseqsDB} ${phylodb_ref_dir}${phylodb_reference} ${phylodb_out_dir}${phylodb_mmseqsDB} ${tmp} -s 6
+
+# Alignment with backtrace
+# mmseqs search ${assembly_prot_dir}${assembly_mmseqsDB} ${refdir}${ref} ${outdir}${resultDB} ${tmp} \
+#     -a -s 6
+
+# Convert to blast tab formatted file
+mmseqs convertalis ${assembly_prot_dir}${assembly_mmseqsDB} ${phylodb_ref_dir}${phylodb_reference} ${phylodb_out_dir}${phylodb_mmseqsDB} ${phylodb_out_dir}${phylodb_mmseqsDB}.m8
+
+# The .m8 file is formatted as a tab-separated list with 12 columns:
+# 1. ID for query seq
+# 2. ID for target seq
+# 3. Sequence identity
+# 4. alignment length
+# 5. number of mismatches
+# 6. number of gap openings
+# 7. query domain start
+# 8. query domain end
+# 9. Target domain start
+# 10. Target domain end
+# 11. E-value
+# 12. bit-score
+
+# If using the -a param, we get 10 columns:
+# 1. ID for query seq
+# 2. ID for target seq
+# 3. alignment length
+# 4. query length
+# 5. subject length
+# 6. query domain start
+# 7. query domain end
+# 8. Target domain start
+# 9. Target domain end
+# 10. E-value
+
+# Extract first hit
+mmseqs filterdb ${phylodb_out_dir}${phylodb_mmseqsDB} ${phylodb_out_dir}${phylodb_mmseqsDB}.firsthit --extract-lines 1
+mmseqs convertalis ${assembly_prot_dir}${assembly_mmseqsDB} ${phylodb_ref_dir}${phylodb_reference} ${phylodb_out_dir}${phylodb_mmseqsDB}.firsthit ${phylodb_out_dir}${phylodb_mmseqsDB}.firsthit.m8
+
+# Extract first hit alignments with  a sequence ID > 90%
+mmseqs filterdb ${phylodb_out_dir}${phylodb_mmseqsDB}.firsthit ${phylodb_out_dir}${phylodb_mmseqsDB}.firsthit.90plus_alnscore \
+    --comparison-operator ge --comparison-value 0.9 --filter-column 3
+
+mmseqs convertalis ${assembly_prot_dir}${assembly_mmseqsDB} ${phylodb_ref_dir}${phylodb_reference} ${phylodb_out_dir}${phylodb_mmseqsDB}.firsthit.90plus_alnscore \
+    ${phylodb_out_dir}${phylodb_mmseqsDB}.firsthit.90plus_alnscore.m8

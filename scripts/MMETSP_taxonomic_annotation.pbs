@@ -1,0 +1,38 @@
+#!/usr/bin/bash -l
+
+#PBS -l nodes=1:ppn=30
+#PBS -l walltime=72:00:00
+#PBS -l mem=150gb
+
+source ../config.sh
+
+unset OMP_PROC_BIND
+
+module load MMseqs2
+
+# Turn the PhyloDB sequences into a mmseqs DB
+mmseqs createdb ${mmetsp_ref_dir}${mmetsp_ref_fasta} ${mmetsp_ref_dir}${mmetsp_reference}
+
+# Turn the query assembly into a mmseqs DB
+mmseqs createdb ${assembly_prot_dir}${assembly_pep} ${assembly_prot_dir}${assembly_mmseqsDB}
+
+# Query assembly against mmetsp_reference
+mmseqs search ${assembly_prot_dir}${assembly_mmseqsDB} ${mmetsp_ref_dir}${mmetsp_reference} ${mmetsp_out_dir}${mmetsp_mmseqsDB} ${tmp} -s 6
+
+# Alignment with backtrace
+# mmseqs search ${assembly_prot_dir}${assembly_mmseqsDB} ${refdir}${ref} ${outdir}${resultDB} ${tmp} \
+#     -a -s 6
+
+# Convert to blast tab formatted file
+mmseqs convertalis ${assembly_prot_dir}${assembly_mmseqsDB} ${mmetsp_ref_dir}${mmetsp_reference} ${mmetsp_out_dir}${mmetsp_mmseqsDB} ${mmetsp_out_dir}${mmetsp_mmseqsDB}.m8
+
+# Extract first hit
+mmseqs filterdb ${mmetsp_out_dir}${mmetsp_mmseqsDB} ${mmetsp_out_dir}${mmetsp_mmseqsDB}.firsthit --extract-lines 1
+mmseqs convertalis ${assembly_prot_dir}${assembly_mmseqsDB} ${mmetsp_ref_dir}${mmetsp_reference} ${mmetsp_out_dir}${mmetsp_mmseqsDB}.firsthit ${mmetsp_out_dir}${mmetsp_mmseqsDB}.firsthit.m8
+
+# Extract first hit alignments with  a sequence ID > 90%
+mmseqs filterdb ${mmetsp_out_dir}${mmetsp_mmseqsDB}.firsthit ${mmetsp_out_dir}${mmetsp_mmseqsDB}.firsthit.90plus_alnscore \
+    --comparison-operator ge --comparison-value 0.9 --filter-column 3
+
+mmseqs convertalis ${assembly_prot_dir}${assembly_mmseqsDB} ${mmetsp_ref_dir}${mmetsp_reference} ${mmetsp_out_dir}${mmetsp_mmseqsDB}.firsthit.90plus_alnscore \
+    ${mmetsp_out_dir}${mmetsp_mmseqsDB}.firsthit.90plus_alnscore.m8

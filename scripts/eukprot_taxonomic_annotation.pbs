@@ -1,0 +1,64 @@
+#!/usr/bin/bash -l
+
+#PBS -l nodes=1:ppn=30
+#PBS -l walltime=72:00:00
+#PBS -l mem=150gb
+
+# Eukprot was downloaded from https://figshare.com/articles/dataset/EukProt_a_database_of_genome-scale_predicted_proteins_across_the_diversity_of_eukaryotic_life/12417881/3?file=34436249
+# Downloaded on 12/06/2023 (version 3)
+source ../config.sh
+
+unset OMP_PROC_BIND
+
+module load MMseqs2
+
+# Turn the EukProt sequences into a mmseqs DB
+mmseqs createdb ${eukprot_ref_dir}${eukprot_ref_fasta} ${eukprot_ref_dir}${eukprot_reference}
+
+# Turn the query assembly into a mmseqs DB
+mmseqs createdb ${assembly_prot_dir}${assembly_pep} ${assembly_prot_dir}${assembly_mmseqsDB}
+
+# Query assembly against reference
+mmseqs search ${assembly_prot_dir}${assembly_mmseqsDB} ${eukprot_ref_dir}${eukprot_reference} ${eukprot_out_dir}${eukprot_mmseqsDB} ${tmp} -s 6
+
+# Convert to blast tab formatted file
+mmseqs convertalis ${assembly_prot_dir}${assembly_mmseqsDB} ${eukprot_ref_dir}${eukprot_reference} ${eukprot_out_dir}${eukprot_mmseqsDB} ${eukprot_out_dir}${eukprot_mmseqsDB}.m8
+
+# The .m8 file is formatted as a tab-separated list with 12 columns:
+# 1. ID for query seq
+# 2. ID for target seq
+# 3. Sequence identity
+# 4. alignment length
+# 5. number of mismatches
+# 6. number of gap openings
+# 7. query domain start
+# 8. query domain end
+# 9. Target domain start
+# 10. Target domain end
+# 11. E-value
+# 12. bit-score
+
+# Extract first hit
+mmseqs filterdb ${eukprot_out_dir}${eukprot_mmseqsDB} ${eukprot_out_dir}${eukprot_mmseqsDB}.firsthit --extract-lines 1
+mmseqs convertalis ${assembly_prot_dir}${assembly_mmseqsDB} ${eukprot_ref_dir}${eukprot_reference} ${eukprot_out_dir}${eukprot_mmseqsDB}.firsthit ${eukprot_out_dir}${eukprot_mmseqsDB}.firsthit.m8
+
+# Extract first hit alignments with  a sequence ID > 95%
+mmseqs filterdb ${eukprot_out_dir}${eukprot_mmseqsDB}.firsthit ${eukprot_out_dir}${eukprot_mmseqsDB}.firsthit.95plus_alnscore \
+    --comparison-operator ge --comparison-value 0.95 --filter-column 3
+
+mmseqs convertalis ${assembly_prot_dir}${assembly_mmseqsDB} ${eukprot_ref_dir}${eukprot_reference} ${eukprot_out_dir}${eukprot_mmseqsDB}.firsthit.95plus_alnscore \
+    ${eukprot_out_dir}${eukprot_mmseqsDB}.firsthit.95plus_alnscore.m8
+
+## Extract first hit alignments with  a sequence ID > 90%
+mmseqs filterdb ${eukprot_out_dir}${eukprot_mmseqsDB}.firsthit ${eukprot_out_dir}${eukprot_mmseqsDB}.firsthit.90plus_alnscore \
+    --comparison-operator ge --comparison-value 0.9 --filter-column 3
+
+mmseqs convertalis ${assembly_prot_dir}${assembly_mmseqsDB} ${eukprot_ref_dir}${eukprot_reference} ${eukprot_out_dir}${eukprot_mmseqsDB}.firsthit.90plus_alnscore \
+    ${eukprot_out_dir}${eukprot_mmseqsDB}.firsthit.90plus_alnscore.m8
+
+# Extract first hit alignments with  a sequence ID > 60%
+mmseqs filterdb ${eukprot_out_dir}${eukprot_mmseqsDB}.firsthit ${eukprot_out_dir}${eukprot_mmseqsDB}.firsthit.60plus_alnscore \
+    --comparison-operator ge --comparison-value 0.6 --filter-column 3
+
+mmseqs convertalis ${assembly_prot_dir}${assembly_mmseqsDB} ${eukprot_ref_dir}${eukprot_reference} ${eukprot_out_dir}${eukprot_mmseqsDB}.firsthit.60plus_alnscore \
+    ${eukprot_out_dir}${eukprot_mmseqsDB}.firsthit.60plus_alnscore.m8

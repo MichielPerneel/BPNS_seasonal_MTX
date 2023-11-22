@@ -1,0 +1,108 @@
+__default__:
+        jobname: "{rule}.{wildcards}"
+        nodes: 1
+        ppn: 8
+        mem: "8gb"
+        walltime: "06:00:00"
+        account: "vsc43619"
+        email: "michiel.perneel@ugent.be"
+        mailon: "ae"
+        jobout: "oe"
+        queue: "victini"
+        outdir: "/data/gent/vo/001/gvo00125/vsc43619/BPNS_seasonal_MTX/data/logs/"
+
+fastqc:
+        walltime: "06:00:00"
+        queue: "doduo"
+        mem: "30gb"
+        ppn: 12
+
+fastqc_merged:
+        walltime: "00:30:00"
+        queue: "doduo"
+        mem: "30gb"
+        ppn: 12
+
+merge_reads:
+        nodes: 1
+        ppn: 4
+        mem: "50gb"
+        queue: "kirlia"
+        walltime: "00:40:00"
+
+sample_rRNA_cleanup:
+        nodes: 1
+        ppn: 20
+        mem: "30gb"
+        queue: "doduo"
+        walltime: "08:00:00"
+
+identify_ERCCs:
+        nodes: 1
+        ppn: 40
+        mem: "80gb"
+        queue: "doduo"
+        walltime: "02:00:00"
+        
+rnaSPAdes:
+        nodes: 1
+        ppn: 16
+        mem: "50gb"
+        queue: "kirlia"
+        walltime: "12:00:00"
+
+cluster_assembly:
+        nodes: 1
+        ppn: 60
+        mem: "150gb"
+        queue: "doduo"
+        walltime: "72:00:00"
+
+ORF_prediction:
+        nodes: 1
+        ppn: 24
+        mem: "60gb"
+        queue: "doduo"
+        walltime: "48:00:00"
+
+protein_prediction:
+        nodes: 1
+        ppn: 24
+        mem: "60gb"
+        queue: "doduo"
+        walltime: "48:00:00"
+
+kallisto_index:
+        nodes: 1
+        ppn: 60
+        mem: "120gb"
+        queue: "doduo"
+        walltime: "12:00:00"
+
+kallisto_quant:
+        nodes: 1
+        ppn: 60
+        mem: "120gb"
+        queue: "doduo"
+        walltime: "01:00:00"
+
+kallisto_index_ERCC:
+        nodes: 1
+        ppn: 10
+        mem: "20gb"
+        queue: "kirlia"
+        walltime: "12:00:00"
+
+kallisto_quant_ERCC:
+        nodes: 1
+        ppn: 15
+        mem: "30gb"
+        queue: "doduo"
+        walltime: "01:00:00"
+
+merge_kallisto:
+        nodes: 1
+        ppn: 40
+        mem: "80gb"
+        queue: "doduo"
+        walltime: "02:00:00"

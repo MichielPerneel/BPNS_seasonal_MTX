@@ -1,0 +1,10 @@
+data/*
+.snakemake/*
+submit_snakemake.*
+figures/*
+*.pbs.e*
+*.pbs.o*
+scripts/trophic-mode-ml/data/*
+config.yaml
+config.sh
+scripts/analysis/export_flowcam.R

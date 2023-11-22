@@ -1,0 +1,41 @@
+#!/usr/bin/bash -l
+
+#PBS -l nodes=1:ppn=60
+#PBS -l walltime=72:00:00
+#PBS -l mem=150gb
+
+source ../config.sh
+
+# Align individual BPNS metatranscriptomic assemblies (mostly from large planktonic size fractions) on every MAG assembly 
+module load minimap2/2.24-GCCcore-11.2.0
+module load SAMtools
+
+cd ${work_dir}
+
+# map samples using Minimap2 (version 2.24) with the ‘‘-ax splice’’ 
+for sample in $(awk -F";" '{if (NR!=1) print $1}' samples.csv); do
+    minimap2 -ax splice --split-prefix ${TARA_MAG_out_dir}temporary_prefix ${TARA_MAG_ref} ${assembly_dir}${sample}/transcripts.fasta |
+    samtools sort -@30 -o ${TARA_MAG_out_dir}${sample}.bam;
+done
+
+module purge
+
+# Check the number of well-mapped reads using bamfilters
+## https://github.com/institut-de-genomique/bamFilters
+
+module load bamFilters
+
+# low complexity alignments were removed from BAM files as follows:
+# only alignments covering at least 80% of a given metatranscriptomic contig with at least 95% of identity were retained.
+# The above is the same parameter setting in Delmont et al. 2022
+# "Functional repertoire convergence of distantly related eukaryotic plankton lineages abundant in the sunlit ocean"
+
+for sample in $(awk -F";" '{if (NR!=1) print $1}' samples.csv); do
+    bamFilters -b ${TARA_MAG_out_dir}${sample}.bam \
+    -i 95 -a 80 \
+    -o ${MAG_bamfilters_dir}${sample}.bam 
+    -u ${MAG_bamfilters_dir}${sample}.uniq.bam;
+done
+# u: outputs BAM file for uniq filter which select reads that mapped only at one position
+
+# Now, retrieve average number of alignments using samtools stats
