@@ -16,6 +16,7 @@ library(forcats)
 
 options(stringsAsFactors = FALSE)
 allowWGCNAThreads()
+enableWGCNAThreads()
 
 #Read in normalized, gene-annotated (modules or KOs) transcript counts
 samples_genes_matrix <- read.csv("data/analysis/KEGG_ko_TPM_sum_transposed.csv",
@@ -148,7 +149,7 @@ adjacency <- adjacency(datExpr,
                         power = softPower,
                         type = "signed")
 
-# Store the adjacency matrix locally for future use, calculation takes a while
+# Optional: store the adjacency matrix locally for future use, calculation takes a while
 # save(adjacency, file = "data/analysis/WGCNA/adjacency.RData")
                         
 # Translate the adjacency into topological overlap matrix and calculate the corresponding dissimilarity
