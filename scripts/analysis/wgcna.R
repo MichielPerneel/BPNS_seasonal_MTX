@@ -112,34 +112,34 @@ sft <- pickSoftThreshold(datExpr,
                         powerVector = powers,
                         networkType = "signed",
                         verbose = 2) # we want smallest value, closest to 0.9
-sizeGrWindow(3, 5)
-par(mfrow = c(2, 1));
-cex1 <- 0.9;
-#Scale-free topology fit index as a function of the soft-thresholding power
-plot(sft$fitIndices[, 1],
-    -sign(sft$fitIndices[, 3]) * sft$fitIndices[, 2],
-    xlab = "Soft Threshold (power)",
-    ylab = "Scale Free Topology Model Fit,signed R^2",
-    type = "n",
-    main = paste("Scale independence"));
-text(sft$fitIndices[, 1],
-    -sign(sft$fitIndices[, 3]) * sft$fitIndices[, 2],
-    labels = powers, cex = cex1, col = "red");
-abline(h = 0.80, col = "red")
-abline(h = 0.90, col = "red")
-#This line corresponds to using an R^2 cut-off of h
 
-#Mean connectivity as a function of the soft-thresholding power
-plot(sft$fitIndices[, 1],
-    sft$fitIndices[, 5],
-    xlab = "Soft Threshold (power)",
-    ylab = "Mean Connectivity",
-    type = "n",
-    main = paste("Mean connectivity"))
-text(sft$fitIndices[, 1],
-    sft$fitIndices[, 5],
-    labels = powers,
-    cex = cex1, col = "red")
+# Convert to a dataframe for plotting
+sft_data <- as.data.frame(sft$fitIndices)
+sft_data$Power <- sft_data[,1]
+sft_data$ScaledR2 <- -sign(sft_data[,3]) * sft_data[,2]
+sft_data$MeanConnectivity <- sft_data[,5]
+sft_data$Labels <- powers
+
+# Plot 1: Scale-free topology fit index
+plot1 <- ggplot(sft_data, aes(x = Power, y = ScaledR2, label = Labels)) +
+  geom_point() +
+  geom_text(colour = "grey",nudge_y = 0.05) +
+  geom_hline(yintercept = c(0.80, 0.90), colour = "red", linetype = "dashed") +
+  labs(x = "Soft Threshold (power)", y = "Scale Free Topology Model Fit, signed R^2", 
+       title = "Scale independence") +
+  theme_minimal()
+
+# Plot 2: Mean connectivity
+plot2 <- ggplot(sft_data, aes(x = Power, y = MeanConnectivity, label = Labels)) +
+  geom_point() +
+  geom_text(colour = "grey", nudge_y = 0.10) +
+  labs(x = "Soft Threshold (power)", y = "Mean Connectivity", 
+       title = "Mean connectivity") +
+  theme_minimal()
+
+  # Save the plots
+ggsave("figures/WGCNA/scale_independence.svg", plot = plot1, width = 10, height = 5, dpi = 600)
+ggsave("figures/WGCNA/mean_connectivity.svg", plot = plot2, width = 10, height = 5, dpi = 600)
 
 # Choose soft thresholding power based on the plot above
 softPower <- 14 # smallest value to plateau above 0.8
