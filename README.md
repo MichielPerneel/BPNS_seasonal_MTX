@@ -2,7 +2,7 @@
   <h1>
   A Year-long Metatranscriptomic Study in the North Sea
   </h1>
-  A bioinformatic pipeline to process monthly raw metatranscriptomic samples from microeukaryotic plankton into interpretable data. This is the code used to analyse and visualize the data for [this publication](https://journals.asm.org/doi/10.1128/mbio.00383-24)
+  A bioinformatic pipeline to process monthly raw metatranscriptomic samples from microeukaryotic plankton into interpretable data.
   </p>
 <br/>
 
@@ -18,7 +18,7 @@
 </p>  
 
 ## About
-Marine microeukaryotic plankton play key roles in global carbon and nutrient cycling, and knowledge of their diverse taxonomy and functional repertoire has increased substantially in the last decade largely due to global -omics surveys. However, few studies have been done to track seasonal turnover in microeukaryotic functional diversity at fixed locations. With this study we present a seasonal metatranscriptomic dataset based on monthly samples from July 2020 to July 2020, sampled from 6 fixed stations in the Southern North Sea. We observe the phenological and metabolic dynamics of a coastal microeukaryotic plankton assemblage in the region. Our analysis identifies key seasonal shifts in biodiversity and functional richness, underscoring the metabolic traits of dominant taxonomic groups. The data also elucidate spatial variations resulting from the convergence of oceanic and estuarine waters and highlight variations in trophic feeding modes of specific microeukaryotes. 
+Marine microeukaryotic plankton play key roles in global carbon and nutrient cycling, and knowledge of their diverse taxonomy and functional repertoire has increased substantially in the last decade largely due to global -omics surveys. However, few studies have been done to track seasonal turnover in microeukaryotic functional diversity at fixed locations. With this study we present a seasonal metatranscriptomic dataset based on monthly samples from July 2020 to July 2020, sampled from 6 fixed stations in the Southern North Sea. We observe the phenological and metabolic dynamics of a coastal microeukaryotic plankton assemblage in the region. Our analysis identifies key seasonal shifts in biodiversity and functional richness, underscoring the metabolic traits of dominant taxonomic groups. The data also elucidate spatial variations resulting from the convergence of oceanic and estuarine waters and highlight variations in trophic feeding modes of specific microeukaryotes. The code in this repository was used to analyse and visualize the data for [this publication](https://journals.asm.org/doi/10.1128/mbio.00383-24)
 
 ## Data
 The raw sequence data needs to be stored in the `data/raw` folder to be able to run the Snakemake workflow. The workflow is designed to handle PE RNA-seq reads from mixed environmental communities.
