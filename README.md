@@ -2,7 +2,7 @@
   <h1>
   A Year-long Metatranscriptomic Study in the North Sea
   </h1>
-  A bioinformatic pipeline to process monthly raw metatranscriptomic samples from microeukaryotic plankton into interpretable data.
+  A bioinformatic pipeline to process monthly raw metatranscriptomic samples from microeukaryotic plankton into interpretable data. This is the code used to analyse and visualize the data for [this publication](https://journals.asm.org/doi/10.1128/mbio.00383-24)
   </p>
 <br/>
 
